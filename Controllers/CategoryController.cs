@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -19,6 +20,14 @@ namespace TesteEf.Controllers
             return categories;
         }
 
+        [HttpGet]
+        [Route("{id:int}")]
+        public async Task<ActionResult<Category>> GetById([FromServices] DataContext context, int id)
+        {
+            var category = await context.Categories.AsNoTracking().FirstOrDefaultAsync(x => x.Id == id);
+            return category;
+        }
+
         [HttpPost]
         [Route("")]
         public async Task<ActionResult<Category>> Post(
@@ -35,6 +44,32 @@ namespace TesteEf.Controllers
             {
                 return BadRequest(ModelState);
             }
+        }
+        [HttpPut]
+        [Route("")]
+        public async Task<ActionResult<Category>> Update(
+            [FromServices] DataContext context,
+            [FromBody] Category category)
+        {
+
+            context.Entry<Category>(category).State = EntityState.Modified;
+            await context.SaveChangesAsync();
+            
+            return category;
+
+        }
+        [HttpDelete]
+        [Route("")]
+        public async Task<ActionResult<Category>> Delete(
+            [FromServices] DataContext context,
+            [FromBody] Category category)
+        {
+
+            context.Categories.Remove(category);
+            await context.SaveChangesAsync();
+            
+            return category;
+
         }
     }
 }
